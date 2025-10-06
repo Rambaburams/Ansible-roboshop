@@ -1,0 +1,26 @@
+- name: create ec2 and route53
+  hosts: local
+  connection: local
+  vars:
+    ami_id: "ami-09c813fb71547fc4f"
+    sg_id: "sg-0a1100e78e229b0d8"
+    zone_id: "Z0948150OFPSYTNVYZOY"
+    domain_name: "rambabu.fun"
+    insatnces:
+    - mongodb
+
+    tasks:
+    - name: create ec2 instance
+      amazon.aws.ec2_instance:
+      name: "{{ item }}"
+      instance_type: t2.micro
+      security_group: "{{ sg_id }}"
+      image_id: "{{ ami_id }}"
+      tags:
+        name: "{{ item }}"
+      loop: "{{ insatnces }}"
+      register: ec2_output
+
+  - name: print the ec2_output
+    ansible.builtin.debug:
+      msg: "{{ ec2_output }}"
