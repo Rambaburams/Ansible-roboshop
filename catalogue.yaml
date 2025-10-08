@@ -1,0 +1,78 @@
+- name: setup catalouge server
+  hosts: catalouge
+  become: yes
+  tasks:
+  - name: Disable node module
+    ansible.builtin.command: dnf module disable nodejs -y
+
+  - name: Enable node:20 module
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+  - name: install nodejs
+    ansilbe.builtin.package:
+      name: nodejs
+      state: present
+  
+  - name: create roboshop system user
+    ansible.builtin.user:
+      name: roboshop
+      comment: RoboShop System user
+      system: true
+      shell: /sbin/nologin
+      home: /app
+
+  - name: cretae app directory
+    ansible.builtin.file:
+      path: /app
+      state: directory
+ 
+  - name: download catalogue application
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+      dest: /tmp/catalogue.zip
+
+  - name: extract catalogue application
+    ansible.builtin.unarchive:
+      src: /tmp/catalogue.zip
+      dest: /app
+      remote_src: yes
+
+  - name: install dependencies
+    community.general.npm:
+      path: /app
+  
+  - name: copy the catalougue service
+    ansible.builtin.copy:
+      src: catalouage.service
+      dest: /etc/systemd/system/catalogue.service
+  
+  - name: copy the mongo.repo
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+
+  - name: install mongodb client
+    ansible.builtin.package:
+      name: mongodb-mongosh
+      state: present
+
+   - name: connnect to mongodb catalogue
+    ansible.builtin.command: mongosh mongodb.daws86s.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
+    register: catalogue_output
+
+    - name: load products into mongodb
+    ansible.builtin.shell: mongosh --host mongodb.daws86s.fun </app/db/master-data.js
+    when: catalogue_output.stdout | int < 0
+
+     # - name: start and enable cataalogue
+  #   ansible.builtin.service:
+  #     name: catalogue
+  #     enabled: yes
+  #     state: started
+
+  - name: daemon reload enable and start
+    ansible.builtin.systemd_service:
+      name: catalogue
+      enabled: true
+      state: started
+      daemon_reload: true
