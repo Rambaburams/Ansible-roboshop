@@ -1,25 +1,48 @@
-- name: create ec2 and route53
+# - name: create ec2 and route53
+#   hosts: local
+#   connection: local
+#   vars:
+#     ami_id: "ami-09c813fb71547fc4f"
+#     sg_id: "sg-0a1100e78e229b0d8"
+#     zone_id: "Z00954572KTCAI2TW0SA4"
+#     domain_name: "rambabu.fun"
+#     instances:
+#     - mongodb
+#     tasks:
+#     - name: create ec2 instance
+#       amazon.aws.ec2_instance:
+#         name: "{{ item }}"
+#         instance_type: "t2.micro"
+#         security_group: "{{ sg_id }}"
+#         image_id: "{{ ami_id }}"
+#         tags:
+#           name: "{{ item }}"
+#       loop: "{{ instances }}"
+#       register: ec2_output
+
+#     - name: print the ec2_output
+#       ansible.builtin.debug:
+#         msg: "{{ ec2_output }}"
+- name: create ec2 instance and R53 records
   hosts: local
   connection: local
   vars:
-    ami_id: "ami-09c813fb71547fc4f"
-    sg_id: "sg-0a1100e78e229b0d8"
-    zone_id: "Z00954572KTCAI2TW0SA4"
-    domain_name: "rambabu.fun"
+    ami_id:
+    sg_id:
+    zone_id:
+    domain_name:
     instances:
     - mongodb
-    tasks:
-    - name: create ec2 instance
-      amazon.aws.ec2_instance:
+    - mysql
+    - redis
+  tasks:
+  - name: create ec2 instance
+    amazon.aws.ec2_instance:
+      name: "{{ item }}"
+      instance_type: t2.mirco
+      security_group: "{{ sg_id }}"
+      image_id: "{{ami_id}}"
+      tags:
         name: "{{ item }}"
-        instance_type: "t2.micro"
-        security_group: "{{ sg_id }}"
-        image_id: "{{ ami_id }}"
-        tags:
-          name: "{{ item }}"
-      loop: "{{ instances }}"
-      register: ec2_output
-
-    - name: print the ec2_output
-      ansible.builtin.debug:
-        msg: "{{ ec2_output }}"
+    loop: "{{ instances }}"
+    register: ec2_output
