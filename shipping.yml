@@ -12,8 +12,11 @@
     - mysql
   - name: install mysql for python
     ansible.builtin.pip:
-      name: PyMySQL
+      name: "{{ item }}"
       executable: pip3.9
+    loop:
+      - cryptography
+      - PyMySQL
   
   - name: create roboshop user
     ansible.builtin.user:
