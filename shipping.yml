@@ -1,4 +1,3 @@
-
 - name: setup shipping server
   hosts: shipping
   become: yes
