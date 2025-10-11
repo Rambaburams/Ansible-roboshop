@@ -13,9 +13,9 @@
   
   - name: create roboshop user
     ansible.builtin.user:
-      nmae: roboshop
+      name: roboshop
       comment: RoboShop System user
-      sysytem: ture
+      system: true
       shell: /sbin/nologin
       home: /app
   
@@ -37,13 +37,13 @@
 
   - name: install dependencies
     ansible.builtin.command: mvn clean package
-      args:
-        chdir: /app
+    args:
+      chdir: /app
 
   - name: move jar file
     ansible.builtin.command: mv target/shipping-1.0.jar shipping.jar
-      args:
-        chdir: /app
+    args:
+      chdir: /app
 
 
   - name: copy shipping service
